@@ -171,6 +171,8 @@
     .clock { font-size: 10px; padding: 0 5px; }
   }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -286,7 +288,6 @@ function openWindow(winId) {
   document.querySelectorAll('.window').forEach(w => w.style.zIndex = '10');
   win.style.zIndex = '20';
   updateTaskbar();
-  if (winId === 'qnaWin') loadQnA();
 }
 function closeWindow(winId) {
   document.getElementById(winId).classList.remove('active');
@@ -406,9 +407,24 @@ function showCharacter(workId, charId) {
 }
 renderGallery();
 
-/* ================= Q&A board (shared storage) ================= */
+/* ================= Firebase ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCtE1EEHJxa4Ry1posvoYGtDwnlpeSH0E0",
+  authDomain: "smuffin-55312.firebaseapp.com",
+  projectId: "smuffin-55312",
+  storageBucket: "smuffin-55312.firebasestorage.app",
+  messagingSenderId: "503780668062",
+  appId: "1:503780668062:web:65fc9f76cf830e3d38018f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const questionsRef = db.collection('questions');
+
+/* ================= Q&A board (Firestore) ================= */
 let adminMode = false;
 const ADMIN_PIN = '1234'; // 코드에서 원하는 값으로 바꿔서 사용하세요
+let qnaCache = [];
+let qnaLoaded = false;
 
 function toggleAdmin() {
   if (adminMode) { adminMode = false; document.getElementById('adminToggleBtn').innerText = '🔒 관리자 모드'; renderQnAList(); return; }
@@ -422,49 +438,32 @@ function toggleAdmin() {
   }
 }
 
-let qnaCache = [];
-
-async function loadQnA() {
-  const listEl = document.getElementById('qnaList');
-  listEl.innerHTML = '불러오는 중...';
-  try {
-    const res = await window.storage.get('qa-board', true);
-    qnaCache = res ? JSON.parse(res.value) : [];
-  } catch (e) {
-    qnaCache = [];
+// 실시간 리스너: 질문이 올라오거나 답변이 달리면 자동으로 화면에 반영됨
+questionsRef.orderBy('timestamp', 'desc').onSnapshot(
+  snapshot => {
+    qnaCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    qnaLoaded = true;
+    renderQnAList();
+  },
+  err => {
+    console.error('Firestore 읽기 오류:', err);
+    const listEl = document.getElementById('qnaList');
+    if (listEl) listEl.innerHTML = '<p style="font-size:11px; color:#c00;">질문을 불러오지 못했어요. Firebase 설정 및 보안 규칙을 확인해주세요.</p>';
   }
-  renderQnAList();
-}
-
-async function saveQnA() {
-  const statusEl = document.getElementById('qnaStatus');
-  try {
-    const result = await window.storage.set('qa-board', JSON.stringify(qnaCache), true);
-    if (!result) {
-      if (statusEl) { statusEl.style.color = '#c00'; statusEl.innerText = '저장 실패 (다시 시도해주세요)'; }
-      return false;
-    }
-    if (statusEl) { statusEl.style.color = '#0a0'; statusEl.innerText = '저장됨 ✓'; setTimeout(() => { statusEl.innerText = ''; }, 2000); }
-    return true;
-  } catch (e) {
-    console.error('저장 오류:', e);
-    if (statusEl) { statusEl.style.color = '#c00'; statusEl.innerText = '저장 실패: 미리보기 화면에서만 저장이 유지돼요.'; }
-    return false;
-  }
-}
+);
 
 function renderQnAList() {
   const listEl = document.getElementById('qnaList');
+  if (!qnaLoaded) { listEl.innerHTML = '불러오는 중...'; return; }
   document.getElementById('qnaCount').innerText = ` (${qnaCache.length})`;
   if (qnaCache.length === 0) {
     listEl.innerHTML = '<p style="font-size:11px; color:#777;">아직 질문이 없어요. 첫 질문을 남겨보세요!</p>';
     return;
   }
-  const sorted = [...qnaCache].sort((a, b) => b.timestamp - a.timestamp);
-  listEl.innerHTML = sorted.map(q => `
+  listEl.innerHTML = qnaCache.map(q => `
     <div class="qna-item">
       <div class="qna-q">🙋 ${escapeHtml(q.question)}</div>
-      <div class="qna-meta">${new Date(q.timestamp).toLocaleString('ko-KR')}</div>
+      <div class="qna-meta">${q.timestamp ? new Date(q.timestamp).toLocaleString('ko-KR') : ''}</div>
       ${q.answer ? `<div class="qna-answer">💬 ${escapeHtml(q.answer)}</div>` : (adminMode ? `
         <div class="qna-reply-form show">
           <textarea id="reply-${q.id}" rows="2" placeholder="답변을 입력하세요..."></textarea>
@@ -484,23 +483,31 @@ function escapeHtml(str) {
 
 async function submitQuestion() {
   const input = document.getElementById('qnaInput');
+  const statusEl = document.getElementById('qnaStatus');
   const text = input.value.trim();
   if (!text) return;
-  qnaCache.push({ id: 'q' + Date.now(), question: text, answer: null, timestamp: Date.now() });
-  input.value = '';
-  renderQnAList();
-  await saveQnA();
+  try {
+    await questionsRef.add({ question: text, answer: null, timestamp: Date.now() });
+    input.value = '';
+    if (statusEl) { statusEl.style.color = '#0a0'; statusEl.innerText = '등록됨 ✓'; setTimeout(() => { statusEl.innerText = ''; }, 2000); }
+  } catch (e) {
+    console.error('저장 오류:', e);
+    if (statusEl) { statusEl.style.color = '#c00'; statusEl.innerText = '저장 실패: Firebase 연결/규칙을 확인해주세요.'; }
+  }
 }
 
 async function submitAnswer(id) {
   const ta = document.getElementById('reply-' + id);
   const text = ta.value.trim();
   if (!text) return;
-  const item = qnaCache.find(q => q.id === id);
-  if (item) { item.answer = text; item.answeredAt = Date.now(); }
-  renderQnAList();
-  await saveQnA();
+  try {
+    await questionsRef.doc(id).update({ answer: text, answeredAt: Date.now() });
+  } catch (e) {
+    console.error('답변 저장 오류:', e);
+    alert('답변 저장에 실패했어요. Firebase 연결/규칙을 확인해주세요.');
+  }
 }
+
 </script>
 </body>
 </html>
