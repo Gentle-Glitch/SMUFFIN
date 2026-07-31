@@ -1,3 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>NEO-OS 98 - Retro Portfolio</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #008080; /* Classic Win95 Teal */
+            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif;
+            image-rendering: pixelated;
+            user-select: none;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Desktop Grid */
+        .desktop {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 90px);
+            grid-auto-rows: 90px;
+            gap: 15px;
+            padding: 20px;
+            height: calc(100vh - 40px);
+        }
+
+        .icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            border: 1px dotted transparent;
+        }
+
+        .icon:hover {
+            background-color: rgba(0, 0, 128, 0.3);
+            border: 1px dotted #ffffff;
+        }
+
+        .icon:active, .icon.selected {
+            background-color: #000080;
+            color: white;
+        }
+
+        .icon-img {
+            width: 32px;
+            height: 32px;
+            background: #c0c0c0;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-right: 1px solid #808080;
+            border-bottom: 1px solid #808080;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .icon-text {
+            color: white;
+            font-size: 11px;
+            text-align: center;
+            text-shadow: 1px 1px #000;
+            padding: 1px 3px;
+        }
+
+        .icon:active .icon-text, .icon.selected .icon-text {
+            background-color: #000080;
+        }
+
+        /* Retro Window */
+        .window {
+            position: absolute;
+            top: 50px;
+            left: 100px;
+            width: 480px;
+            background: #c0c0c0;
+            border-top: 2px solid #fff;
+            border-left: 2px solid #fff;
+            border-right: 2px solid #000;
+            border-bottom: 2px solid #000;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+            display: none;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .window.active {
+            display: flex;
+        }
+
+        .title-bar {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            color: white;
+            padding: 3px 5px;
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-bar-buttons {
+            display: flex;
+            gap: 2px;
+        }
+
+        .win-btn {
+            width: 16px;
+            height: 14px;
+            background: #c0c0c0;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            font-size: 9px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #000;
+        }
+
+        .win-btn:active {
+            border-top: 1px solid #000;
+            border-left: 1px solid #000;
+            border-right: 1px solid #fff;
+            border-bottom: 1px solid #fff;
+        }
+
+        .window-body {
+            padding: 10px;
+            background: #c0c0c0;
+            font-size: 12px;
+        }
+
+        .sunken-panel {
+            background: #fff;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #fff;
+            border-bottom: 2px solid #fff;
+            padding: 10px;
+            height: 220px;
+            overflow-y: auto;
+            color: #000;
+            line-height: 1.4;
+        }
+
+        /* Taskbar */
+        .taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 28px;
+            background: #c0c0c0;
+            border-top: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 2px;
+            z-index: 1000;
+        }
+
+        .start-btn {
+            height: 22px;
+            padding: 0 8px;
+            background: #c0c0c0;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            font-weight: bold;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .start-btn:active {
+            border-top: 1px solid #000;
+            border-left: 1px solid #000;
+            border-right: 1px solid #fff;
+            border-bottom: 1px solid #fff;
+        }
+
+        .taskbar-tasks {
+            display: flex;
+            gap: 4px;
+            margin-left: 6px;
+            flex-grow: 1;
+        }
+
+        .task-item {
+            height: 22px;
+            padding: 0 10px;
+            background: #c0c0c0;
+            border-top: 1px solid #fff;
+            border-left: 1px solid #fff;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-item.active {
+            border-top: 1px solid #000;
+            border-left: 1px solid #000;
+            border-right: 1px solid #fff;
+            border-bottom: 1px solid #fff;
+            background: #dfdfdf;
+            font-weight: bold;
+        }
+
+        .clock {
+            padding: 0 8px;
+            height: 20px;
+            border-top: 1px solid #808080;
+            border-left: 1px solid #808080;
+            border-right: 1px solid #fff;
+            border-bottom: 1px solid #fff;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            background: #c0c0c0;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="desktop">
+        <!-- Icon 1: About Me -->
+        <div class="icon" onclick="openWindow('aboutWin')">
+            <div class="icon-img">📁</div>
+            <div class="icon-text">About.txt</div>
+        </div>
+        <!-- Icon 2: Projects -->
+        <div class="icon" onclick="openWindow('projectsWin')">
+            <div class="icon-img">💼</div>
+            <div class="icon-text">Projects</div>
+        </div>
+        <!-- Icon 3: Skills -->
+        <div class="icon" onclick="openWindow('skillsWin')">
+            <div class="icon-img">⚡</div>
+            <div class="icon-text">Skills.sys</div>
+        </div>
+        <!-- Icon 4: Contact -->
+        <div class="icon" onclick="openWindow('contactWin')">
+            <div class="icon-img">✉️</div>
+            <div class="icon-text">Contact</div>
+        </div>
+    </div>
+
+    <!-- Window 1: About -->
+    <div id="aboutWin" class="window" style="top: 40px; left: 50px;">
+        <div class="title-bar">
+            <span>About.txt - Notepad</span>
+            <div class="title-bar-buttons">
+                <div class="win-btn" onclick="closeWindow('aboutWin')">X</div>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="sunken-panel">
+                <h3>안녕하세요! 레트로 감성을 사랑하는 크리에이터입니다.</h3>
+                <p>본 페이지는 Windows 95 유산과 Y2K 감성을 담아 제작된 인터랙티브 포트폴리오입니다.</p>
+                <p>단순한 이력 나열을 넘어, 방문자가 직접 탐색하고 조작하는 재미를 느낄 수 있도록 구성했습니다.</p>
+                <hr style="border:0; border-top:1px solid #808080; margin:10px 0;">
+                <p><b>Core Value:</b> 직관성, 몰입감, 그리고 감성적인 디테일.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Window 2: Projects -->
+    <div id="projectsWin" class="window" style="top: 80px; left: 120px;">
+        <div class="title-bar">
+            <span>Projects Explorer</span>
+            <div class="title-bar-buttons">
+                <div class="win-btn" onclick="closeWindow('projectsWin')">X</div>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="sunken-panel">
+                <ul>
+                    <li><b>NEO-OS Portfolio Web</b>: 윈도우 95 스타일의 웹 인터페이스 구현</li>
+                    <li><b>Cyberpunk World Archive</b>: 가상 세계관 및 인터랙티브 로그 시스템 디자인</li>
+                    <li><b>Retro UI Components</b>: 웹 환경에서의 도트/입체 버튼 스타일링 라이브러리</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Window 3: Skills -->
+    <div id="skillsWin" class="window" style="top: 120px; left: 180px;">
+        <div class="title-bar">
+            <span>Skills.sys</span>
+            <div class="title-bar-buttons">
+                <div class="win-btn" onclick="closeWindow('skillsWin')">X</div>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="sunken-panel">
+                <p><b>Frontend:</b> HTML5, CSS3, JavaScript (ES6+)</p>
+                <p><b>Design & Concept:</b> Retro UI/UX, World-building, Interactive Storytelling</p>
+                <p><b>Tools:</b> Git, VS Code, Figma</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Window 4: Contact -->
+    <div id="contactWin" class="window" style="top: 160px; left: 240px;">
+        <div class="title-bar">
+            <span>Contact.exe</span>
+            <div class="title-bar-buttons">
+                <div class="win-btn" onclick="closeWindow('contactWin')">X</div>
+            </div>
+        </div>
+        <div class="window-body">
+            <div class="sunken-panel" style="text-align: center; padding-top: 30px;">
+                <p><b>Get in Touch!</b></p>
+                <p>Email: example@retro-mail.com</p>
+                <p>GitHub: github.com/retro-creator</p>
+                <br>
+                <button style="background:#c0c0c0; border-top:1px solid #fff; border-left:1px solid #fff; border-right:2px solid #000; border-bottom:2px solid #000; padding:4px 12px; cursor:pointer;" onclick="alert('메시지 전송 기능이 호출되었습니다!')">메시지 보내기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <div class="start-btn">
+            <span>🏁</span> Start
+        </div>
+        <div class="taskbar-tasks" id="taskbarTasks"></div>
+        <div class="clock" id="clock">12:00 PM</div>
+    </div>
+
+    <script>
+        // Clock update
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('clock').innerText = `${hours}:${minutes} ${ampm}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Window management
+        function openWindow(winId) {
+            const win = document.getElementById(winId);
+            win.classList.add('active');
+            
+            // Bring to front
+            document.querySelectorAll('.window').forEach(w => w.style.zIndex = '10');
+            win.style.zIndex = '20';
+            
             updateTaskbar();
         }
 
