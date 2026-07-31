@@ -87,9 +87,13 @@
   .work-card:hover, .char-card:hover { background: #d8e8ff; border-color: #000080; }
   .work-card:active, .char-card:active { transform: translateY(1px); }
   .work-cover, .char-avatar {
+    position: relative; overflow: hidden;
     width: 100%; height: 70px; border-radius: 4px; margin-bottom: 6px;
     display: flex; align-items: center; justify-content: center; font-size: 28px;
     color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  }
+  .work-cover img, .char-avatar img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
   }
   .char-avatar { height: 60px; width: 60px; border-radius: 50%; margin: 0 auto 6px; font-size: 24px; }
   .work-title { font-weight: bold; font-size: 12px; }
@@ -308,51 +312,64 @@ function updateTaskbar() {
   });
 }
 
-/* ================= Projects data ================= */
+/* ================= Projects data =================
+   works와 characters 각각에 image 속성을 추가해서 사진을 넣을 수 있어요.
+   - image: "images/파일명.jpg" 처럼 리포지토리 안의 상대 경로를 쓰거나
+   - image: "https://..." 처럼 외부 이미지 주소(imgur 등)를 그대로 써도 됩니다.
+   - image를 비워두거나("") 아예 안 쓰면 원래처럼 이모지+그라디언트로 표시돼요.
+*/
 const worksData = [
   {
-    id: 'neon-drift', title: '뒷골목', genre: '느와르 · 범죄', emoji: '🏍️',
+    id: 'neon-drift', title: '뒷골목', genre: '느와르 · 범죄', emoji: '🏍️', image: '',
     color: 'linear-gradient(135deg, #ff3d68, #6a00ff)',
     characters: [
-      { id: '', name: '원태경', role: '노란장판짜슥', emoji: '🕶️', color: 'linear-gradient(135deg,#ff6ec7,#6a00ff)',
+      { id: '', name: '원태경', role: '노란장판짜슥', emoji: '🕶️', image: '', color: 'linear-gradient(135deg,#ff6ec7,#6a00ff)',
         bio: '맞으면서도 실실 쪼개는 미X놈',
         traits: ['빠른 순발력', '기계 다루는 솜씨', '고집이 세다'] },
-      { id: 'luna', name: '루나', role: '해커', emoji: '💻', color: 'linear-gradient(135deg,#00e5ff,#6a00ff)',
+      { id: 'luna', name: '루나', role: '해커', emoji: '💻', image: '', color: 'linear-gradient(135deg,#00e5ff,#6a00ff)',
         bio: '네온드리프트 팀의 두뇌. 도시의 통신망을 손바닥처럼 꿰뚫고 있다.',
         traits: ['냉철한 분석력', '정보 수집 전문', '말수가 적다'] },
-      { id: 'jet', name: '제트', role: '메카닉', emoji: '🔧', color: 'linear-gradient(135deg,#ffb347,#ff3d68)',
+      { id: 'jet', name: '제트', role: '메카닉', emoji: '🔧', image: '', color: 'linear-gradient(135deg,#ffb347,#ff3d68)',
         bio: '팀의 차량을 관리하는 손재주 좋은 정비사. 위기 상황에서 늘 유머를 잃지 않는다.',
         traits: ['손재주가 좋다', '긍정적인 성격', '엔진 소리로 고장 진단 가능'] }
     ]
   },
   {
-    id: 'moonlight-books', title: '화양연화', genre: '드라마 · 노란장판', emoji: '📖',
+    id: 'moonlight-books', title: '화양연화', genre: '드라마 · 노란장판', emoji: '📖', image: '',
     color: 'linear-gradient(135deg, #7c2b86, #ffd76b)',
     characters: [
-      { id: 'TAEYU', name: '전태유', role: '불법 파이터', emoji: '🌙', color: 'linear-gradient(135deg,#7c2b86,#ffb3de)',
+      { id: 'TAEYU', name: '전태유', role: '불법 파이터', emoji: '🌙', image: '', color: 'linear-gradient(135deg,#7c2b86,#ffb3de)',
         bio: '내가 쫓아다녔던 복싱 유망주가 잠적했다.',
         traits: ['따뜻한 성품', '책에 대한 해박한 지식', '비밀이 많다'] },
-      { id: 'hanui', name: '하늬', role: '책 정령', emoji: '🍃', color: 'linear-gradient(135deg,#8fd3c8,#7c2b86)',
+      { id: 'hanui', name: '하늬', role: '책 정령', emoji: '🍃', image: '', color: 'linear-gradient(135deg,#8fd3c8,#7c2b86)',
         bio: '서점의 오래된 책 속에서 태어난 작은 정령. 장난기 많지만 위급할 때는 든든하다.',
         traits: ['호기심이 많다', '바람을 다룬다', '장난꾸러기'] }
     ]
   },
   {
-    id: 'codename-aurora', title: '러브 포션 No.9 : 핑크빛 대재앙', genre: '판타지 · 게임', emoji: '🛰️',
+    id: 'codename-aurora', title: '러브 포션 No.9 : 핑크빛 대재앙', genre: '판타지 · 게임', emoji: '🛰️', image: '',
     color: 'linear-gradient(135deg, #00e5ff, #2b0f54)',
     characters: [
-      { id: 'aurora', name: '오로라', role: '인공지능', emoji: '🤖', color: 'linear-gradient(135deg,#00e5ff,#7c2b86)',
+      { id: 'aurora', name: '오로라', role: '인공지능', emoji: '🤖', image: '', color: 'linear-gradient(135deg,#00e5ff,#7c2b86)',
         bio: '우주정거장을 관리하는 자율 인공지능. 논리적이지만 점점 감정을 배워가고 있다.',
         traits: ['방대한 데이터 처리', '논리적 사고', '감정 학습 중'] },
-      { id: 'vector', name: '벡터', role: '탐사 요원', emoji: '🚀', color: 'linear-gradient(135deg,#ffb347,#00e5ff)',
+      { id: 'vector', name: '벡터', role: '탐사 요원', emoji: '🚀', image: '', color: 'linear-gradient(135deg,#ffb347,#00e5ff)',
         bio: '미지의 행성을 탐사하는 베테랑 요원. 팀의 안전을 최우선으로 여긴다.',
         traits: ['냉정한 판단력', '생존 전문가', '책임감이 강하다'] },
-      { id: 'nova', name: '노바', role: '과학자', emoji: '🔬', color: 'linear-gradient(135deg,#ff6ec7,#00e5ff)',
+      { id: 'nova', name: '노바', role: '과학자', emoji: '🔬', image: '', color: 'linear-gradient(135deg,#ff6ec7,#00e5ff)',
         bio: '오로라 프로젝트를 설계한 수석 과학자. 호기심이 이끄는 대로 연구에 몰두한다.',
         traits: ['끝없는 호기심', '분석적 사고', '연구에 몰입하면 시간 가는 줄 모름'] }
     ]
   }
 ];
+
+// 이미지가 있으면 <img>를, 없으면 이모지를 반환. 이미지 로드 실패 시 자동으로 이모지로 대체됨.
+function coverMedia(item) {
+  if (item.image) {
+    return `<img src="${item.image}" alt="${item.name || item.title}" onerror="this.replaceWith(document.createTextNode('${item.emoji}'))">`;
+  }
+  return item.emoji;
+}
 
 function renderCrumb(parts) {
   const el = document.getElementById('projectsCrumb');
@@ -366,7 +383,7 @@ function renderGallery() {
   renderCrumb([{ label: 'Projects' }]);
   const html = `<div class="work-grid">${worksData.map(w => `
     <div class="work-card" onclick="showWork('${w.id}')">
-      <div class="work-cover" style="background:${w.color}">${w.emoji}</div>
+      <div class="work-cover" style="background:${w.color}">${coverMedia(w)}</div>
       <div class="work-title">${w.title}</div>
       <div class="work-tag">${w.genre}</div>
     </div>`).join('')}</div>`;
@@ -378,7 +395,7 @@ function showWork(workId) {
   renderCrumb([{ label: 'Projects', action: 'renderGallery()' }, { label: w.title }]);
   const html = `<div class="char-grid">${w.characters.map(c => `
     <div class="char-card" onclick="showCharacter('${w.id}','${c.id}')">
-      <div class="char-avatar" style="background:${c.color}">${c.emoji}</div>
+      <div class="char-avatar" style="background:${c.color}">${coverMedia(c)}</div>
       <div class="char-name">${c.name}</div>
       <div class="char-role">${c.role}</div>
     </div>`).join('')}</div>`;
@@ -394,7 +411,7 @@ function showCharacter(workId, charId) {
     { label: c.name }
   ]);
   const html = `<div class="char-profile">
-    <div class="char-avatar" style="background:${c.color}">${c.emoji}</div>
+    <div class="char-avatar" style="background:${c.color}">${coverMedia(c)}</div>
     <div class="char-profile-body">
       <h3>${c.name}</h3>
       <span class="role-tag">${c.role} · ${w.title}</span>
@@ -507,7 +524,6 @@ async function submitAnswer(id) {
     alert('답변 저장에 실패했어요. Firebase 연결/규칙을 확인해주세요.');
   }
 }
-
 </script>
 </body>
 </html>
