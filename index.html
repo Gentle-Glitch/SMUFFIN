@@ -1,407 +1,553 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>NEO-OS 98 - Retro Portfolio</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #008080; /* Classic Win95 Teal */
-            font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif;
-            image-rendering: pixelated;
-            user-select: none;
-            overflow: hidden;
-            height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEO-OS 98 - Retro Portfolio</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    font-family: 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif;
+    image-rendering: pixelated;
+    user-select: none;
+  }
+  body { position: relative; background: #1a0b2e; }
 
-        /* Desktop Grid */
-        .desktop {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, 90px);
-            grid-auto-rows: 90px;
-            gap: 15px;
-            padding: 20px;
-            height: calc(100vh - 40px);
-        }
+  /* ---------- Classic "Bliss" style Windows background ---------- */
+  .bg-scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+  .bg-sky {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      #1f6fd6 0%, #3f92e6 22%, #6db6ef 42%, #a9d8f5 62%, #d9f0fb 80%, #eef9ff 100%);
+  }
+  .cloud {
+    position: absolute; background: #fff; border-radius: 50px;
+    opacity: 0.95; filter: blur(0.5px);
+    box-shadow: 0 8px 18px rgba(60, 100, 150, 0.15);
+    animation: cloudDrift 90s linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: ''; position: absolute; background: #fff; border-radius: 50%;
+  }
+  .cloud-a { width: 160px; height: 44px; top: 8%; left: 8%; }
+  .cloud-a::before { width: 70px; height: 70px; top: -38px; left: 20px; }
+  .cloud-a::after { width: 50px; height: 50px; top: -26px; left: 90px; }
+  .cloud-b { width: 120px; height: 34px; top: 16%; left: 62%; animation-delay: -30s; }
+  .cloud-b::before { width: 54px; height: 54px; top: -28px; left: 14px; }
+  .cloud-b::after { width: 38px; height: 38px; top: -18px; left: 66px; }
+  .cloud-c { width: 90px; height: 26px; top: 6%; left: 40%; animation-delay: -60s; }
+  .cloud-c::before { width: 40px; height: 40px; top: -20px; left: 10px; }
+  .cloud-c::after { width: 30px; height: 30px; top: -14px; left: 50px; }
+  .cloud-d { width: 130px; height: 36px; top: 24%; left: 22%; animation-delay: -45s; opacity: 0.85; }
+  .cloud-d::before { width: 58px; height: 58px; top: -30px; left: 16px; }
+  .cloud-d::after { width: 42px; height: 42px; top: -20px; left: 72px; }
+  @keyframes cloudDrift { from { transform: translateX(-30px); } to { transform: translateX(30px); } }
+  @media (prefers-reduced-motion: reduce) { .cloud { animation: none; } }
 
-        .icon {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 80px;
-            height: 80px;
-            cursor: pointer;
-            border: 1px dotted transparent;
-        }
+  .bg-hill-back {
+    position: absolute; left: -5%; bottom: 0; width: 110%; height: 32%;
+    background: linear-gradient(180deg, #7cc95e 0%, #4fa832 100%);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    transform: scaleX(1.4);
+  }
+  .bg-hill-front {
+    position: absolute; left: -10%; bottom: 0; width: 130%; height: 22%;
+    background: linear-gradient(180deg, #8fdc55 0%, #3f9124 70%, #2f7a1a 100%);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    transform: scaleX(1.15) translateY(6%);
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.08) inset;
+  }
 
-        .icon:hover {
-            background-color: rgba(0, 0, 128, 0.3);
-            border: 1px dotted #ffffff;
-        }
+  /* ---------- Desktop ---------- */
+  .desktop {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 90px);
+    grid-auto-rows: 90px;
+    gap: 15px; padding: 20px;
+    height: calc(100vh - 40px);
+  }
+  .icon {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 80px; height: 80px; cursor: pointer; border: 1px dotted transparent;
+  }
+  .icon:hover { background-color: rgba(0,0,128,0.3); border: 1px dotted #ffffff; }
+  .icon:active, .icon.selected { background-color: #000080; color: white; }
+  .icon-img {
+    width: 32px; height: 32px; background: #c0c0c0;
+    border-top: 1px solid #fff; border-left: 1px solid #fff;
+    border-right: 1px solid #808080; border-bottom: 1px solid #808080;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; margin-bottom: 4px;
+  }
+  .icon-text { color: white; font-size: 11px; text-align: center; text-shadow: 1px 1px #000; padding: 1px 3px; }
+  .icon:active .icon-text, .icon.selected .icon-text { background-color: #000080; }
 
-        .icon:active, .icon.selected {
-            background-color: #000080;
-            color: white;
-        }
+  /* ---------- Windows ---------- */
+  .window {
+    position: absolute; width: 480px; background: #c0c0c0;
+    border-top: 2px solid #fff; border-left: 2px solid #fff;
+    border-right: 2px solid #000; border-bottom: 2px solid #000;
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+    display: none; flex-direction: column; z-index: 10;
+    max-height: calc(100vh - 70px);
+  }
+  .window.active { display: flex; }
+  .window.wide { width: 560px; }
+  .title-bar {
+    background: linear-gradient(90deg, #000080, #1084d0); color: white;
+    padding: 3px 5px; font-weight: bold; font-size: 12px;
+    display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+  }
+  .title-bar-buttons { display: flex; gap: 2px; }
+  .win-btn {
+    width: 16px; height: 14px; background: #c0c0c0;
+    border-top: 1px solid #fff; border-left: 1px solid #fff;
+    border-right: 1px solid #000; border-bottom: 1px solid #000;
+    font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #000;
+  }
+  .win-btn:active { border-top: 1px solid #000; border-left: 1px solid #000; border-right: 1px solid #fff; border-bottom: 1px solid #fff; }
+  .window-body { padding: 10px; background: #c0c0c0; font-size: 12px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+  .sunken-panel {
+    background: #fff; border-top: 2px solid #808080; border-left: 2px solid #808080;
+    border-right: 2px solid #fff; border-bottom: 2px solid #fff;
+    padding: 10px; height: 220px; overflow-y: auto; color: #000; line-height: 1.4;
+  }
+  .sunken-panel.tall { height: 340px; }
 
-        .icon-img {
-            width: 32px;
-            height: 32px;
-            background: #c0c0c0;
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-right: 1px solid #808080;
-            border-bottom: 1px solid #808080;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
+  /* ---------- Breadcrumb ---------- */
+  .crumb { font-size: 11px; margin-bottom: 6px; color: #000080; }
+  .crumb span { cursor: pointer; text-decoration: underline; }
+  .crumb .sep { color: #555; text-decoration: none; margin: 0 4px; cursor: default; }
+  .crumb .current { color: #000; text-decoration: none; font-weight: bold; cursor: default; }
 
-        .icon-text {
-            color: white;
-            font-size: 11px;
-            text-align: center;
-            text-shadow: 1px 1px #000;
-            padding: 1px 3px;
-        }
+  /* ---------- Project gallery ---------- */
+  .work-grid, .char-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .work-card, .char-card {
+    cursor: pointer; border: 1px solid #808080; background: #ececec;
+    padding: 8px; text-align: center; transition: transform 0.05s;
+  }
+  .work-card:hover, .char-card:hover { background: #d8e8ff; border-color: #000080; }
+  .work-card:active, .char-card:active { transform: translateY(1px); }
+  .work-cover, .char-avatar {
+    width: 100%; height: 70px; border-radius: 4px; margin-bottom: 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+    color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  }
+  .char-avatar { height: 60px; width: 60px; border-radius: 50%; margin: 0 auto 6px; font-size: 24px; }
+  .work-title { font-weight: bold; font-size: 12px; }
+  .work-tag { font-size: 10px; color: #555; }
+  .char-name { font-weight: bold; font-size: 11px; }
+  .char-role { font-size: 10px; color: #555; }
 
-        .icon:active .icon-text, .icon.selected .icon-text {
-            background-color: #000080;
-        }
+  .char-profile { display: flex; gap: 12px; }
+  .char-profile .char-avatar { width: 80px; height: 80px; font-size: 32px; flex-shrink: 0; }
+  .char-profile-body h3 { margin: 0 0 4px 0; font-size: 14px; }
+  .char-profile-body .role-tag { display: inline-block; background: #000080; color: #fff; font-size: 10px; padding: 1px 6px; margin-bottom: 6px; }
+  .traits-list { margin: 6px 0 0 0; padding-left: 16px; font-size: 11px; }
 
-        /* Retro Window */
-        .window {
-            position: absolute;
-            top: 50px;
-            left: 100px;
-            width: 480px;
-            background: #c0c0c0;
-            border-top: 2px solid #fff;
-            border-left: 2px solid #fff;
-            border-right: 2px solid #000;
-            border-bottom: 2px solid #000;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
-            display: none;
-            flex-direction: column;
-            z-index: 10;
-        }
+  /* ---------- Q&A board ---------- */
+  .qna-form textarea {
+    width: 100%; font-family: inherit; font-size: 12px; resize: vertical;
+    border-top: 2px solid #808080; border-left: 2px solid #808080;
+    border-right: 2px solid #fff; border-bottom: 2px solid #fff; padding: 6px;
+  }
+  .btn-95 {
+    background: #c0c0c0; border-top: 1px solid #fff; border-left: 1px solid #fff;
+    border-right: 2px solid #000; border-bottom: 2px solid #000;
+    padding: 4px 12px; cursor: pointer; font-size: 11px; font-family: inherit;
+  }
+  .btn-95:active { border-top: 2px solid #000; border-left: 2px solid #000; border-right: 1px solid #fff; border-bottom: 1px solid #fff; }
+  .qna-toolbar { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; }
+  .qna-item { border-bottom: 1px dashed #999; padding: 8px 0; }
+  .qna-q { font-size: 12px; }
+  .qna-meta { font-size: 10px; color: #777; margin-top: 2px; }
+  .qna-answer { margin-top: 6px; background: #eef; border-left: 3px solid #000080; padding: 6px 8px; font-size: 11px; }
+  .qna-reply-form { margin-top: 6px; display: none; }
+  .qna-reply-form.show { display: block; }
+  .qna-reply-form textarea { width: 100%; font-family: inherit; font-size: 11px; }
+  .admin-badge { font-size: 10px; background: #ff6ec7; color: #fff; padding: 1px 6px; margin-left: 6px; }
 
-        .window.active {
-            display: flex;
-        }
+  /* ---------- Taskbar ---------- */
+  .taskbar {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 28px;
+    background: #c0c0c0; border-top: 2px solid #fff;
+    display: flex; align-items: center; padding: 0 2px; z-index: 1000;
+  }
+  .start-btn {
+    height: 22px; padding: 0 8px; background: #c0c0c0;
+    border-top: 1px solid #fff; border-left: 1px solid #fff;
+    border-right: 1px solid #000; border-bottom: 1px solid #000;
+    font-weight: bold; font-size: 11px; display: flex; align-items: center; gap: 4px; cursor: pointer;
+  }
+  .start-btn:active { border-top: 1px solid #000; border-left: 1px solid #000; border-right: 1px solid #fff; border-bottom: 1px solid #fff; }
+  .taskbar-tasks { display: flex; gap: 4px; margin-left: 6px; flex-grow: 1; overflow: hidden; }
+  .task-item {
+    height: 22px; padding: 0 10px; background: #c0c0c0;
+    border-top: 1px solid #fff; border-left: 1px solid #fff;
+    border-right: 1px solid #000; border-bottom: 1px solid #000;
+    font-size: 11px; display: flex; align-items: center; gap: 4px; cursor: pointer;
+    max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .task-item.active { border-top: 1px solid #000; border-left: 1px solid #000; border-right: 1px solid #fff; border-bottom: 1px solid #fff; background: #dfdfdf; font-weight: bold; }
+  .clock {
+    padding: 0 8px; height: 20px; border-top: 1px solid #808080; border-left: 1px solid #808080;
+    border-right: 1px solid #fff; border-bottom: 1px solid #fff; font-size: 11px;
+    display: flex; align-items: center; background: #c0c0c0; margin-right: 4px; flex-shrink: 0;
+  }
 
-        .title-bar {
-            background: linear-gradient(90deg, #000080, #1084d0);
-            color: white;
-            padding: 3px 5px;
-            font-weight: bold;
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .title-bar-buttons {
-            display: flex;
-            gap: 2px;
-        }
-
-        .win-btn {
-            width: 16px;
-            height: 14px;
-            background: #c0c0c0;
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
-            font-size: 9px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #000;
-        }
-
-        .win-btn:active {
-            border-top: 1px solid #000;
-            border-left: 1px solid #000;
-            border-right: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-        }
-
-        .window-body {
-            padding: 10px;
-            background: #c0c0c0;
-            font-size: 12px;
-        }
-
-        .sunken-panel {
-            background: #fff;
-            border-top: 2px solid #808080;
-            border-left: 2px solid #808080;
-            border-right: 2px solid #fff;
-            border-bottom: 2px solid #fff;
-            padding: 10px;
-            height: 220px;
-            overflow-y: auto;
-            color: #000;
-            line-height: 1.4;
-        }
-
-        /* Taskbar */
-        .taskbar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 28px;
-            background: #c0c0c0;
-            border-top: 2px solid #fff;
-            display: flex;
-            align-items: center;
-            padding: 0 2px;
-            z-index: 1000;
-        }
-
-        .start-btn {
-            height: 22px;
-            padding: 0 8px;
-            background: #c0c0c0;
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
-            font-weight: bold;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-        }
-
-        .start-btn:active {
-            border-top: 1px solid #000;
-            border-left: 1px solid #000;
-            border-right: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-        }
-
-        .taskbar-tasks {
-            display: flex;
-            gap: 4px;
-            margin-left: 6px;
-            flex-grow: 1;
-        }
-
-        .task-item {
-            height: 22px;
-            padding: 0 10px;
-            background: #c0c0c0;
-            border-top: 1px solid #fff;
-            border-left: 1px solid #fff;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            max-width: 120px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .task-item.active {
-            border-top: 1px solid #000;
-            border-left: 1px solid #000;
-            border-right: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-            background: #dfdfdf;
-            font-weight: bold;
-        }
-
-        .clock {
-            padding: 0 8px;
-            height: 20px;
-            border-top: 1px solid #808080;
-            border-left: 1px solid #808080;
-            border-right: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            background: #c0c0c0;
-            margin-right: 4px;
-        }
-    </style>
+  /* ---------- Mobile ---------- */
+  @media (max-width: 700px) {
+    .desktop { grid-template-columns: repeat(auto-fill, 72px); grid-auto-rows: 78px; gap: 8px; padding: 12px; }
+    .icon { width: 66px; height: 74px; }
+    .window {
+      position: fixed !important; top: 0 !important; left: 0 !important;
+      width: 100% !important; height: calc(100% - 40px); max-height: none;
+      border: none; box-shadow: none;
+    }
+    .window-body { flex: 1; overflow: hidden; }
+    .sunken-panel, .sunken-panel.tall { height: auto !important; flex: 1; }
+    .work-grid, .char-grid { grid-template-columns: repeat(2, 1fr); }
+    .char-profile { flex-direction: column; }
+    .char-profile .char-avatar { margin: 0 auto; }
+    .task-item { max-width: 80px; }
+    .clock { font-size: 10px; padding: 0 5px; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="desktop">
-        <!-- Icon 1: About Me -->
-        <div class="icon" onclick="openWindow('aboutWin')">
-            <div class="icon-img">📁</div>
-            <div class="icon-text">About.txt</div>
-        </div>
-        <!-- Icon 2: Projects -->
-        <div class="icon" onclick="openWindow('projectsWin')">
-            <div class="icon-img">💼</div>
-            <div class="icon-text">Projects</div>
-        </div>
-        <!-- Icon 3: Skills -->
-        <div class="icon" onclick="openWindow('skillsWin')">
-            <div class="icon-img">⚡</div>
-            <div class="icon-text">Skills.sys</div>
-        </div>
-        <!-- Icon 4: Contact -->
-        <div class="icon" onclick="openWindow('contactWin')">
-            <div class="icon-img">✉️</div>
-            <div class="icon-text">Contact</div>
-        </div>
+<div class="bg-scene">
+  <div class="bg-sky"></div>
+  <div class="cloud cloud-a"></div>
+  <div class="cloud cloud-b"></div>
+  <div class="cloud cloud-c"></div>
+  <div class="cloud cloud-d"></div>
+  <div class="bg-hill-back"></div>
+  <div class="bg-hill-front"></div>
+</div>
+
+<div class="desktop">
+  <div class="icon" onclick="openWindow('aboutWin')">
+    <div class="icon-img">📁</div>
+    <div class="icon-text">About.txt</div>
+  </div>
+  <div class="icon" onclick="openWindow('projectsWin')">
+    <div class="icon-img">💼</div>
+    <div class="icon-text">Projects</div>
+  </div>
+  <div class="icon" onclick="openWindow('qnaWin')">
+    <div class="icon-img">❓</div>
+    <div class="icon-text">질문함</div>
+  </div>
+  <div class="icon" onclick="openWindow('contactWin')">
+    <div class="icon-img">✉️</div>
+    <div class="icon-text">Contact</div>
+  </div>
+</div>
+
+<!-- About -->
+<div id="aboutWin" class="window" style="top: 40px; left: 50px;">
+  <div class="title-bar">
+    <span>About.txt - Notepad</span>
+    <div class="title-bar-buttons"><div class="win-btn" onclick="closeWindow('aboutWin')">X</div></div>
+  </div>
+  <div class="window-body">
+    <div class="sunken-panel">
+      <h3>안녕하세요. 위프에서 제작 활동을 하고 있는 스머핀입니다. 찾아주셔서 감사합니다.</h3>
+      <p>새로운 시도를 해보는 걸 좋아합니다. 다른 말로는 그냥 하고 싶은 거 다 합니다. 창작이라는 행위를 사랑하여, 제 손에서 무언가가 빚어진다는 사실 자체가 감개무량합니다. AI라는 것이 무궁무진하기에 접근 방식이나, 의도가 잘 전달될지를 고민합니다.</p>
+      <p>근데 음흉함을 곁들인.</p>
+      <hr style="border:0; border-top:1px solid #808080; margin:10px 0;">
+      <p><b>Core Value:</b> 직관성, 몰입감, 그리고 감성적인 디테일.</p>
     </div>
+  </div>
+</div>
 
-    <!-- Window 1: About -->
-    <div id="aboutWin" class="window" style="top: 40px; left: 50px;">
-        <div class="title-bar">
-            <span>About.txt - Notepad</span>
-            <div class="title-bar-buttons">
-                <div class="win-btn" onclick="closeWindow('aboutWin')">X</div>
-            </div>
-        </div>
-        <div class="window-body">
-            <div class="sunken-panel">
-                <h3>안녕하세요! 레트로 감성을 사랑하는 크리에이터입니다.</h3>
-                <p>본 페이지는 Windows 95 유산과 Y2K 감성을 담아 제작된 인터랙티브 포트폴리오입니다.</p>
-                <p>단순한 이력 나열을 넘어, 방문자가 직접 탐색하고 조작하는 재미를 느낄 수 있도록 구성했습니다.</p>
-                <hr style="border:0; border-top:1px solid #808080; margin:10px 0;">
-                <p><b>Core Value:</b> 직관성, 몰입감, 그리고 감성적인 디테일.</p>
-            </div>
-        </div>
+<!-- Projects -->
+<div id="projectsWin" class="window wide" style="top: 70px; left: 110px;">
+  <div class="title-bar">
+    <span>Projects Explorer</span>
+    <div class="title-bar-buttons"><div class="win-btn" onclick="closeWindow('projectsWin')">X</div></div>
+  </div>
+  <div class="window-body">
+    <div class="crumb" id="projectsCrumb"></div>
+    <div class="sunken-panel tall" id="projectsContent"></div>
+  </div>
+</div>
+
+<!-- Q&A -->
+<div id="qnaWin" class="window" style="top: 100px; left: 170px;">
+  <div class="title-bar">
+    <span>질문함 - Anonymous Ask</span>
+    <div class="title-bar-buttons"><div class="win-btn" onclick="closeWindow('qnaWin')">X</div></div>
+  </div>
+  <div class="window-body">
+    <p style="margin: 0 0 6px 0; font-size: 12px;">궁금한 점을 익명으로 남겨주세요. 답변은 여기서 확인할 수 있어요!</p>
+    <div class="qna-form">
+      <textarea id="qnaInput" rows="2" placeholder="익명으로 질문을 남겨보세요..."></textarea>
+      <div style="text-align:right; margin-top:4px;">
+        <button class="btn-95" onclick="submitQuestion()">질문 보내기</button>
+      </div>
     </div>
-
-    <!-- Window 2: Projects -->
-    <div id="projectsWin" class="window" style="top: 80px; left: 120px;">
-        <div class="title-bar">
-            <span>Projects Explorer</span>
-            <div class="title-bar-buttons">
-                <div class="win-btn" onclick="closeWindow('projectsWin')">X</div>
-            </div>
-        </div>
-        <div class="window-body">
-            <div class="sunken-panel">
-                <ul>
-                    <li><b>NEO-OS Portfolio Web</b>: 윈도우 95 스타일의 웹 인터페이스 구현</li>
-                    <li><b>Cyberpunk World Archive</b>: 가상 세계관 및 인터랙티브 로그 시스템 디자인</li>
-                    <li><b>Retro UI Components</b>: 웹 환경에서의 도트/입체 버튼 스타일링 라이브러리</li>
-                </ul>
-            </div>
-        </div>
+    <div class="qna-toolbar">
+      <span style="font-size:11px;">전체 질문<span id="qnaCount"></span></span>
+      <button class="btn-95" id="adminToggleBtn" onclick="toggleAdmin()">🔒 관리자 모드</button>
     </div>
+    <div class="sunken-panel" id="qnaList">불러오는 중...</div>
+  </div>
+</div>
 
-    <!-- Window 3: Skills -->
-    <div id="skillsWin" class="window" style="top: 120px; left: 180px;">
-        <div class="title-bar">
-            <span>Skills.sys</span>
-            <div class="title-bar-buttons">
-                <div class="win-btn" onclick="closeWindow('skillsWin')">X</div>
-            </div>
-        </div>
-        <div class="window-body">
-            <div class="sunken-panel">
-                <p><b>Frontend:</b> HTML5, CSS3, JavaScript (ES6+)</p>
-                <p><b>Design & Concept:</b> Retro UI/UX, World-building, Interactive Storytelling</p>
-                <p><b>Tools:</b> Git, VS Code, Figma</p>
-            </div>
-        </div>
+<!-- Contact -->
+<div id="contactWin" class="window" style="top: 130px; left: 230px;">
+  <div class="title-bar">
+    <span>Contact.exe</span>
+    <div class="title-bar-buttons"><div class="win-btn" onclick="closeWindow('contactWin')">X</div></div>
+  </div>
+  <div class="window-body">
+    <div class="sunken-panel" style="text-align: center; padding-top: 30px;">
+      <p><b>Get in Touch!</b></p>
+      <p>X: @SmuffinGang</p>
+      <p>WHIF: @SmuffinGang</p>
+      <br>
+      <button class="btn-95" onclick="alert('영원히 메시지 전송 기능이 호출되지 않습니다!')">메시지 보내기</button>
     </div>
+  </div>
+</div>
 
-    <!-- Window 4: Contact -->
-    <div id="contactWin" class="window" style="top: 160px; left: 240px;">
-        <div class="title-bar">
-            <span>Contact.exe</span>
-            <div class="title-bar-buttons">
-                <div class="win-btn" onclick="closeWindow('contactWin')">X</div>
-            </div>
-        </div>
-        <div class="window-body">
-            <div class="sunken-panel" style="text-align: center; padding-top: 30px;">
-                <p><b>Get in Touch!</b></p>
-                <p>Email: example@retro-mail.com</p>
-                <p>GitHub: github.com/retro-creator</p>
-                <br>
-                <button style="background:#c0c0c0; border-top:1px solid #fff; border-left:1px solid #fff; border-right:2px solid #000; border-bottom:2px solid #000; padding:4px 12px; cursor:pointer;" onclick="alert('메시지 전송 기능이 호출되었습니다!')">메시지 보내기</button>
-            </div>
-        </div>
+<!-- Taskbar -->
+<div class="taskbar">
+  <div class="start-btn"><span>🏁</span> Start</div>
+  <div class="taskbar-tasks" id="taskbarTasks"></div>
+  <div class="clock" id="clock">12:00 PM</div>
+</div>
+
+<script>
+/* ================= Clock ================= */
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours(); const m = String(now.getMinutes()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  document.getElementById('clock').innerText = `${h}:${m} ${ampm}`;
+}
+setInterval(updateClock, 1000); updateClock();
+
+/* ================= Window management ================= */
+function openWindow(winId) {
+  const win = document.getElementById(winId);
+  win.classList.add('active');
+  document.querySelectorAll('.window').forEach(w => w.style.zIndex = '10');
+  win.style.zIndex = '20';
+  updateTaskbar();
+  if (winId === 'qnaWin') loadQnA();
+}
+function closeWindow(winId) {
+  document.getElementById(winId).classList.remove('active');
+  updateTaskbar();
+}
+function updateTaskbar() {
+  const bar = document.getElementById('taskbarTasks');
+  bar.innerHTML = '';
+  document.querySelectorAll('.window').forEach(win => {
+    if (win.classList.contains('active')) {
+      const title = win.querySelector('.title-bar span').innerText.split(' - ')[0];
+      const item = document.createElement('div');
+      item.className = 'task-item active';
+      item.innerText = title;
+      item.onclick = () => { document.querySelectorAll('.window').forEach(w => w.style.zIndex = '10'); win.style.zIndex = '20'; };
+      bar.appendChild(item);
+    }
+  });
+}
+
+/* ================= Projects data ================= */
+const worksData = [
+  {
+    id: 'neon-drift', title: '네온드리프트', genre: '사이버펑크 · 웹툰', emoji: '🏍️',
+    color: 'linear-gradient(135deg, #ff3d68, #6a00ff)',
+    characters: [
+      { id: 'kai', name: '카이', role: '레이서', emoji: '🕶️', color: 'linear-gradient(135deg,#ff6ec7,#6a00ff)',
+        bio: '도시의 지하 레이스를 전전하는 전직 정비 엔지니어. 즉흥적인 판단력으로 위기를 헤쳐나간다.',
+        traits: ['빠른 순발력', '기계 다루는 솜씨', '고집이 세다'] },
+      { id: 'luna', name: '루나', role: '해커', emoji: '💻', color: 'linear-gradient(135deg,#00e5ff,#6a00ff)',
+        bio: '네온드리프트 팀의 두뇌. 도시의 통신망을 손바닥처럼 꿰뚫고 있다.',
+        traits: ['냉철한 분석력', '정보 수집 전문', '말수가 적다'] },
+      { id: 'jet', name: '제트', role: '메카닉', emoji: '🔧', color: 'linear-gradient(135deg,#ffb347,#ff3d68)',
+        bio: '팀의 차량을 관리하는 손재주 좋은 정비사. 위기 상황에서 늘 유머를 잃지 않는다.',
+        traits: ['손재주가 좋다', '긍정적인 성격', '엔진 소리로 고장 진단 가능'] }
+    ]
+  },
+  {
+    id: 'moonlight-books', title: '달빛서점', genre: '판타지 · 소설', emoji: '📖',
+    color: 'linear-gradient(135deg, #7c2b86, #ffd76b)',
+    characters: [
+      { id: 'ayoung', name: '아영', role: '서점 주인', emoji: '🌙', color: 'linear-gradient(135deg,#7c2b86,#ffb3de)',
+        bio: '보름달이 뜨는 밤에만 열리는 신비한 서점의 주인. 손님의 마음을 읽는 책을 골라준다.',
+        traits: ['따뜻한 성품', '책에 대한 해박한 지식', '비밀이 많다'] },
+      { id: 'hanui', name: '하늬', role: '책 정령', emoji: '🍃', color: 'linear-gradient(135deg,#8fd3c8,#7c2b86)',
+        bio: '서점의 오래된 책 속에서 태어난 작은 정령. 장난기 많지만 위급할 때는 든든하다.',
+        traits: ['호기심이 많다', '바람을 다룬다', '장난꾸러기'] }
+    ]
+  },
+  {
+    id: 'codename-aurora', title: '코드네임: 오로라', genre: 'SF · 게임', emoji: '🛰️',
+    color: 'linear-gradient(135deg, #00e5ff, #2b0f54)',
+    characters: [
+      { id: 'aurora', name: '오로라', role: '인공지능', emoji: '🤖', color: 'linear-gradient(135deg,#00e5ff,#7c2b86)',
+        bio: '우주정거장을 관리하는 자율 인공지능. 논리적이지만 점점 감정을 배워가고 있다.',
+        traits: ['방대한 데이터 처리', '논리적 사고', '감정 학습 중'] },
+      { id: 'vector', name: '벡터', role: '탐사 요원', emoji: '🚀', color: 'linear-gradient(135deg,#ffb347,#00e5ff)',
+        bio: '미지의 행성을 탐사하는 베테랑 요원. 팀의 안전을 최우선으로 여긴다.',
+        traits: ['냉정한 판단력', '생존 전문가', '책임감이 강하다'] },
+      { id: 'nova', name: '노바', role: '과학자', emoji: '🔬', color: 'linear-gradient(135deg,#ff6ec7,#00e5ff)',
+        bio: '오로라 프로젝트를 설계한 수석 과학자. 호기심이 이끄는 대로 연구에 몰두한다.',
+        traits: ['끝없는 호기심', '분석적 사고', '연구에 몰입하면 시간 가는 줄 모름'] }
+    ]
+  }
+];
+
+function renderCrumb(parts) {
+  const el = document.getElementById('projectsCrumb');
+  el.innerHTML = parts.map((p, i) => {
+    if (i === parts.length - 1) return `<span class="current">${p.label}</span>`;
+    return `<span onclick="${p.action}">${p.label}</span><span class="sep">›</span>`;
+  }).join('');
+}
+
+function renderGallery() {
+  renderCrumb([{ label: 'Projects' }]);
+  const html = `<div class="work-grid">${worksData.map(w => `
+    <div class="work-card" onclick="showWork('${w.id}')">
+      <div class="work-cover" style="background:${w.color}">${w.emoji}</div>
+      <div class="work-title">${w.title}</div>
+      <div class="work-tag">${w.genre}</div>
+    </div>`).join('')}</div>`;
+  document.getElementById('projectsContent').innerHTML = html;
+}
+
+function showWork(workId) {
+  const w = worksData.find(x => x.id === workId);
+  renderCrumb([{ label: 'Projects', action: 'renderGallery()' }, { label: w.title }]);
+  const html = `<div class="char-grid">${w.characters.map(c => `
+    <div class="char-card" onclick="showCharacter('${w.id}','${c.id}')">
+      <div class="char-avatar" style="background:${c.color}">${c.emoji}</div>
+      <div class="char-name">${c.name}</div>
+      <div class="char-role">${c.role}</div>
+    </div>`).join('')}</div>`;
+  document.getElementById('projectsContent').innerHTML = html;
+}
+
+function showCharacter(workId, charId) {
+  const w = worksData.find(x => x.id === workId);
+  const c = w.characters.find(x => x.id === charId);
+  renderCrumb([
+    { label: 'Projects', action: 'renderGallery()' },
+    { label: w.title, action: `showWork('${w.id}')` },
+    { label: c.name }
+  ]);
+  const html = `<div class="char-profile">
+    <div class="char-avatar" style="background:${c.color}">${c.emoji}</div>
+    <div class="char-profile-body">
+      <h3>${c.name}</h3>
+      <span class="role-tag">${c.role} · ${w.title}</span>
+      <p>${c.bio}</p>
+      <b style="font-size:11px;">특징</b>
+      <ul class="traits-list">${c.traits.map(t => `<li>${t}</li>`).join('')}</ul>
     </div>
+  </div>`;
+  document.getElementById('projectsContent').innerHTML = html;
+}
+renderGallery();
 
-    <!-- Taskbar -->
-    <div class="taskbar">
-        <div class="start-btn">
-            <span>🏁</span> Start
-        </div>
-        <div class="taskbar-tasks" id="taskbarTasks"></div>
-        <div class="clock" id="clock">12:00 PM</div>
+/* ================= Q&A board (shared storage) ================= */
+let adminMode = false;
+const ADMIN_PIN = '7469'; // 코드에서 원하는 값으로 바꿔서 사용하세요
+
+function toggleAdmin() {
+  if (adminMode) { adminMode = false; document.getElementById('adminToggleBtn').innerText = '🔒 관리자 모드'; renderQnAList(); return; }
+  const pin = prompt('관리자 PIN을 입력하세요:');
+  if (pin === ADMIN_PIN) {
+    adminMode = true;
+    document.getElementById('adminToggleBtn').innerText = '🔓 관리자 모드 (ON)';
+    renderQnAList();
+  } else if (pin !== null) {
+    alert('PIN이 올바르지 않습니다.');
+  }
+}
+
+let qnaCache = [];
+
+async function loadQnA() {
+  const listEl = document.getElementById('qnaList');
+  listEl.innerHTML = '불러오는 중...';
+  try {
+    const res = await window.storage.get('qa-board', true);
+    qnaCache = res ? JSON.parse(res.value) : [];
+  } catch (e) {
+    qnaCache = [];
+  }
+  renderQnAList();
+}
+
+async function saveQnA() {
+  try {
+    const result = await window.storage.set('qa-board', JSON.stringify(qnaCache), true);
+    if (!result) console.error('저장 실패');
+  } catch (e) {
+    console.error('저장 오류:', e);
+    alert('저장 중 오류가 발생했어요. 다시 시도해주세요.');
+  }
+}
+
+function renderQnAList() {
+  const listEl = document.getElementById('qnaList');
+  document.getElementById('qnaCount').innerText = ` (${qnaCache.length})`;
+  if (qnaCache.length === 0) {
+    listEl.innerHTML = '<p style="font-size:11px; color:#777;">아직 질문이 없어요. 첫 질문을 남겨보세요!</p>';
+    return;
+  }
+  const sorted = [...qnaCache].sort((a, b) => b.timestamp - a.timestamp);
+  listEl.innerHTML = sorted.map(q => `
+    <div class="qna-item">
+      <div class="qna-q">🙋 ${escapeHtml(q.question)}</div>
+      <div class="qna-meta">${new Date(q.timestamp).toLocaleString('ko-KR')}</div>
+      ${q.answer ? `<div class="qna-answer">💬 ${escapeHtml(q.answer)}</div>` : (adminMode ? `
+        <div class="qna-reply-form show">
+          <textarea id="reply-${q.id}" rows="2" placeholder="답변을 입력하세요..."></textarea>
+          <div style="text-align:right; margin-top:2px;">
+            <button class="btn-95" onclick="submitAnswer('${q.id}')">답변 등록</button>
+          </div>
+        </div>` : `<div class="qna-meta">아직 답변이 없어요.</div>`)}
     </div>
+  `).join('');
+}
 
-    <script>
-        // Clock update
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            document.getElementById('clock').innerText = `${hours}:${minutes} ${ampm}`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.innerText = str;
+  return div.innerHTML;
+}
 
-        // Window management
-        function openWindow(winId) {
-            const win = document.getElementById(winId);
-            win.classList.add('active');
-            
-            // Bring to front
-            document.querySelectorAll('.window').forEach(w => w.style.zIndex = '10');
-            win.style.zIndex = '20';
-            
-            updateTaskbar();
-        }
+async function submitQuestion() {
+  const input = document.getElementById('qnaInput');
+  const text = input.value.trim();
+  if (!text) return;
+  qnaCache.push({ id: 'q' + Date.now(), question: text, answer: null, timestamp: Date.now() });
+  input.value = '';
+  renderQnAList();
+  await saveQnA();
+}
 
-        function closeWindow(winId) {
-            const win = document.getElementById(winId);
-            win.classList.remove('active');
-            updateTaskbar();
-        }
-
-        function updateTaskbar() {
-            const taskbarTasks = document.getElementById('taskbarTasks');
-            taskbarTasks.innerHTML = '';
-            
-            document.querySelectorAll('.window').forEach(win => {
-                if (win.classList.contains('active')) {
-                    const winId = win.id;
-                    const title = win.querySelector('.title-bar span').innerText.split(' - ')[0];
-                    
-                    const taskItem = document.createElement('div');
-                    taskItem.className = 'task-item active';
-                    taskItem.innerText = title;
-                    taskItem.onclick = () => {
-                        document.querySelectorAll('.window').forEach(w => w.style.zIndex = '10');
-                        win.style.zIndex = '20';
-                    };
-                    taskbarTasks.appendChild(taskItem);
-                }
-            });
-        }
-    </script>
+async function submitAnswer(id) {
+  const ta = document.getElementById('reply-' + id);
+  const text = ta.value.trim();
+  if (!text) return;
+  const item = qnaCache.find(q => q.id === id);
+  if (item) { item.answer = text; item.answeredAt = Date.now(); }
+  renderQnAList();
+  await saveQnA();
+}
+</script>
 </body>
 </html>
