@@ -1,0 +1,32 @@
+            updateTaskbar();
+        }
+
+        function closeWindow(winId) {
+            const win = document.getElementById(winId);
+            win.classList.remove('active');
+            updateTaskbar();
+        }
+
+        function updateTaskbar() {
+            const taskbarTasks = document.getElementById('taskbarTasks');
+            taskbarTasks.innerHTML = '';
+            
+            document.querySelectorAll('.window').forEach(win => {
+                if (win.classList.contains('active')) {
+                    const winId = win.id;
+                    const title = win.querySelector('.title-bar span').innerText.split(' - ')[0];
+                    
+                    const taskItem = document.createElement('div');
+                    taskItem.className = 'task-item active';
+                    taskItem.innerText = title;
+                    taskItem.onclick = () => {
+                        document.querySelectorAll('.window').forEach(w => w.style.zIndex = '10');
+                        win.style.zIndex = '20';
+                    };
+                    taskbarTasks.appendChild(taskItem);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
